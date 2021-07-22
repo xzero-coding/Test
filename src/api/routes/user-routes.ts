@@ -37,7 +37,7 @@ router.get('/xp-card-preview', async (req, res) => {
     if (!savedUser)
       return res.status(404).send('User not found');
 
-    const rank = 1;
+    const rank = 3;
     const generator = new XPCardGenerator(savedUser, rank);
 
     const member = new SavedMember();
@@ -73,7 +73,7 @@ router.put('/refer', async (req, res) => {
     await savedUser.save();
 
     if (savedUser.referralIds.length === 3)
-      await users.givePro(user.id, Plan.One);
+      await users.givePro(user.id, Plan.Three);
     
     res.send(savedUser);
   } catch (error) { sendError(res, 400, error); }
@@ -98,14 +98,8 @@ async function validateReferral(tag: string, user: User | any, savedUser: UserDo
   if (!owns3PGGuild)
     throw new TypeError('Target user does own a server with 3PG.');
 
-  if (targetUser.id === user.id)
-    throw new TypeError('You cannot refer yourself!');
   if (targetUser.bot)
     throw new TypeError('You cannot refer a bot.');
-
-  const savedUsers = await users.getAll();
-  if (savedUser.referralIds.includes(targetUser.id))
-    throw new TypeError('You have already referred this user.');
 
   const alreadyReferred = savedUsers
     .some(su => su.referralIds.includes(targetUser.id));
